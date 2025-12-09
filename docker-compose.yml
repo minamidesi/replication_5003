@@ -1,0 +1,293 @@
+version: "3"
+services:
+  mariadb-server:
+    image: mariadb:10.9.3
+    container_name: mariadb-server
+    environment:
+      - MYSQL_USER=benchmark
+      - MYSQL_PASSWORD=benchmark
+      - MYSQL_ROOT_PASSWORD=benchmark
+      - MYSQL_DATABASE=benchmark
+      - MYSQL_TCP_PORT=3307
+      - MYSQL_UNIX_PORT=3307
+    ports:
+      - "3307:3307"
+    volumes:
+      - mariadb-tmp:/tmp
+    networks:
+      mariadb-nw:
+  mariadb-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/maria/Dockerfile
+    volumes:
+      - ./results/mariadb:/results/mariadb
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/maria/:/app/
+      - ./sut/utils.py:/app/utils.py
+      - mariadb-tmp:/tmp
+    depends_on:
+      - mariadb-server
+    networks:
+      mariadb-nw:
+  mysql-server:
+    image: mysql:8.0.31
+    container_name: mysql-server
+    environment:
+      - MYSQL_USER=benchmark
+      - MYSQL_PASSWORD=benchmark
+      - MYSQL_ROOT_PASSWORD=benchmark
+      - MYSQL_DATABASE=benchmark
+    command:
+      - '--local-infile=1'
+      - '--secure-file-priv=/tmp'
+    ports:
+      - "3336:3336"
+    volumes:
+      - mysql-tmp:/tmp
+    networks:
+      mysql-nw:
+  mysql-client:
+    build:
+      context: .
+      dockerfile: ./sut/my/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/mysql:/results/mysql
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - mysql-tmp:/tmp
+      - ./sut/my/:/app/
+      - ./sut/utils.py:/app/utils.py
+    depends_on:
+      - mysql-server
+    networks:
+      mysql-nw:
+  postgres-server:
+    image: postgres:15.0
+    container_name: postgres-server
+    environment:
+      - POSTGRES_USER=benchmark
+      - POSTGRES_PASSWORD=benchmark
+      - POSTGRES_DB=benchmark
+    ports:
+      - "5442:5442"
+    volumes:
+      - postgres-tmp:/tmp
+      - ./results/postgres:/results/postgres
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+    networks:
+      postgres-nw:
+  postgres-client:
+    build:
+      context: .
+      dockerfile: ./sut/postgres/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - postgres-tmp:/tmp
+      - ./results/postgres:/results/postgres
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/utils.py:/app/utils.py
+      - ./sut/postgres/:/app/
+    depends_on:
+      - postgres-server
+    networks:
+      postgres-nw:
+  sqlite-client:
+    build:
+      context: .
+      dockerfile: ./sut/sqlite/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/sqlite:/results/sqlite
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/sqlite/:/app/
+      - ./sut/utils.py:/app/utils.py
+    networks:
+      sqlite-nw:
+  pandas-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/pandas/Dockerfile
+    volumes:
+      - ./results/pandas:/results/pandas
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/pandas/:/app/
+      - ./sut/utils.py:/app/utils.py
+    # === 添加下面这行 ===
+    command: sh -c "pip install 'numpy<2' && python panda.py"
+  duckdbparse-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/duckdbparse/Dockerfile
+    volumes:
+      - ./results/duckdbparse:/results/duckdbparse
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/duckdbparse/:/app/
+      - ./sut/utils.py:/app/utils.py
+  duckdbauto-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/duckdbauto/Dockerfile
+    volumes:
+      - ./results/duckdbauto:/results/duckdbauto
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/duckdbauto/:/app/
+      - ./sut/utils.py:/app/utils.py
+  opencsv-client:
+    build:
+      context: .
+      dockerfile: ./sut/opencsv/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/opencsv:/results/opencsv
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/opencsv/:/app/
+  pycsv-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/pycsv/Dockerfile
+    volumes:
+      - ./results/pycsv:/results/pycsv
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/pycsv/:/app/
+      - ./sut/utils.py:/app/utils.py
+  rcsv-client:
+    build:
+      context: .
+      dockerfile: ./sut/rcsv/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/rcsv:/results/rcsv
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/rcsv/:/app/
+  rhypoparsr-client:
+    build:
+      context: .
+      dockerfile: ./sut/rhypoparsr/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/rhypoparsr:/results/rhypoparsr
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/rhypoparsr/:/app/
+  clevercs-client:
+    environment:
+      - DATASET=${DATASET}
+    build:
+      context: .
+      dockerfile: ./sut/clevercs/Dockerfile
+    volumes:
+      - ./results/clevercs:/results/clevercs
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/clevercs/:/app/
+      - ./sut/utils.py:/app/utils.py
+  libreoffice-client:
+    build:
+      context: .
+      dockerfile: ./sut/libreoffice/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/libreoffice:/results/libreoffice
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/utils.py:/app/utils.py
+      - ./sut/libreoffice/:/app/
+  univocity-client:
+    build:
+      context: .
+      dockerfile: ./sut/univocity/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/univocity:/results/univocity
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/univocity/:/app/
+  csvcommons-client:
+    build:
+      context: .
+      dockerfile: ./sut/csvcommons/Dockerfile
+    environment:
+      - DATASET=${DATASET}
+    volumes:
+      - ./results/csvcommons:/results/csvcommons
+      - ./polluted_files:/polluted_files
+      - ./survey_sample:/survey_sample
+      - ./sut/csvcommons/:/app/
+  pollution:
+    image: pollock_pollution
+    command: ["python3", "/app/pollute_main.py"]
+    build:
+      context: .
+      dockerfile: Dockerfile-pollution
+    volumes:
+      - ./polluted_files:/app/polluted_files
+      - ./results/source.csv:/app/results/source.csv
+  evaluate:
+    image: evaluate
+    build:
+      context: .
+      dockerfile: Dockerfile-pollution
+    environment:
+      - DATASET=${DATASET}
+    command: ["python3", "/app/evaluate.py"]
+    volumes:
+      - ./results:/app/results
+      - ./polluted_files:/app/polluted_files
+      - ./survey_sample:/app/survey_sample
+      - ./evaluate.py:/app/evaluate.py
+      - ./sut/utils.py:/app/utils.py
+  paper-tables:
+    image: paper_tables
+    build:
+      context: .
+      dockerfile: Dockerfile-pollution
+    environment:
+      - DATASET=${DATASET}
+    command: ["python3", "/app/paper_tables.py"]
+    volumes:
+      - ./results:/app/results
+      - ./polluted_files:/app/polluted_files
+      - ./survey_sample:/app/survey_sample
+      - ./paper_tables.py:/app/paper_tables.py
+      - ./sut/utils.py:/app/utils.py
+
+volumes:
+  mariadb-tmp:
+  mysql-tmp:
+  postgres-tmp:
+
+networks:
+  mariadb-nw:
+  mysql-nw:
+  postgres-nw:
+  sqlite-nw:
