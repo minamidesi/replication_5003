@@ -1,3 +1,10 @@
+# Structure
+![Screen Shot 2025-12-09 at 3.43.39 PM](https://raw.githubusercontent.com/minamidesi/blog_img_markpeng/main/Screen%20Shot%202025-12-09%20at%203.43.39%20PM.png)
+
+# Dependencies
+- Docker Desktop(4.28.0 (139021) or higher)
+- Python numpy<2
+
 # Procedure
 
 -   Clone this project.
