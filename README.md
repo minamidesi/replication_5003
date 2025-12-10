@@ -10,7 +10,8 @@
 -   Clone this project.
 -   Install prequisite.
 -   Generate pollution by run `docker compose up pollution`.
--   Run test(sample as `Pandas`) `docker compose up pandas-client`.
+-   1)For testing all database, just run`chmod +x benchmark.sh; ./benchmark.sh`
+-   2)For Run Specific databse(sample as `Pandas`) `docker compose up pandas-client`.
 -   Get score: `docker compose up evaluate`.
 -   See result in `results/aggregate_results_polluted_files.csv`.
 
